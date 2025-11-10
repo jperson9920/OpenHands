@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom component utilities for the dashboard */
+@layer components {
+  .card { @apply bg-slate-800 border border-slate-700 rounded p-3; }
+}

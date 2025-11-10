@@ -1,0 +1,78 @@
+# config/config.toml
+# Complete OpenHands configuration (schema-conscious) for local development.
+# Edit values as needed. Keep MCP/server entries commented unless you have the binaries and keys.
+
+[core]
+workspace_base = "/workspace"
+workspace_mount_path = "/workspace"
+sandbox_type = "ssh"
+run_as_devin = false
+enable_auto_lint = true
+enable_cli_session = true
+
+[llm]
+# Primary model and environment variable that contains the API key
+model = "anthropic/claude-sonnet-4-20250514"
+api_key_env = "ANTHROPIC_API_KEY"
+temperature = 0.7
+max_iterations = 50
+max_budget_per_task = 2.0
+
+[llm.fallback]
+model = "anthropic/claude-sonnet-4-20250514"
+api_key_env = "ANTHROPIC_API_KEY"
+
+[agent]
+# Use the CodeActAgent by default for code-focused tasks
+type = "CodeActAgent"
+function_calling_enabled = true
+
+# Memory/history
+memory_enabled = true
+memory_max_threads = 10
+
+# Optional: point to a custom system prompt file in /app/prompts
+# system_prompt_file = "/app/prompts/codeact_system_prompt.txt"
+
+[agent.micro_agents]
+enable_npm = true
+enable_github = true
+enable_repo_study = true
+enable_verifier = true
+
+[runtime]
+container_image = "nikolaik/python-nodejs:python3.11-nodejs20"
+timeout = 300
+use_host_network = false
+
+[github]
+token_env = "GITHUB_TOKEN"
+auto_pr = true
+pr_type = "draft"
+
+[logging]
+level = "INFO"
+log_dir = "/app/logs"
+log_all_events = true
+
+# MCP servers: enable only after installing/configuring the required MCP binaries.
+# Keep commented for local installs unless you intend to run MCP servers.
+# [mcp]
+# enabled = true
+#
+# [[mcp.servers]]
+# name = "brave-search"
+# command = "uvx"
+# args = ["mcp-server-brave-search"]
+# env = { "BRAVE_API_KEY" = "${BRAVE_API_KEY}" }
+#
+# [[mcp.servers]]
+# name = "filesystem"
+# command = "uvx"
+# args = ["mcp-server-filesystem", "${WORKSPACE_BASE}"]
+#
+# [[mcp.servers]]
+# name = "github"
+# command = "node"
+# args = ["C:/path/to/github-mcp/index.js"]
+# env = { "GITHUB_TOKEN" = "${GITHUB_TOKEN}" }

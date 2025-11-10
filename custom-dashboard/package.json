@@ -1,0 +1,48 @@
+{
+  "name": "openhands-custom-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Custom UI dashboard for OpenHands with agent delegation visualization",
+  "scripts": {
+    "start": "vite",
+    "tailwind:build": "tailwindcss -i ./src/tailwind.css -o ./src/generated-tailwind.css --minify",
+    "build": "npm run tailwind:build && vite build",
+    "test": "vitest --run",
+    "lint": "eslint . --ext .js,.jsx",
+    "ci-check": "npm run lint && npm test"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "axios": "^1.6.0",
+    "socket.io-client": "^4.6.0",
+    "@monaco-editor/react": "^4.6.0",
+    "recharts": "^2.10.0",
+    "lucide-react": "^0.294.0"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "tailwindcss": "^3.4.7",
+    "postcss": "^8.4.21",
+    "autoprefixer": "^10.4.13",
+    "vitest": "^1.1.5",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "jsdom": "^22.1.0",
+    "eslint": "^8.40.0",
+    "eslint-plugin-react": "^7.32.2"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
