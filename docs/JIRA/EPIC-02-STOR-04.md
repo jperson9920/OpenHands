@@ -95,10 +95,37 @@ Suggested fixes to complete verification
 - Capture a screenshot or exported HTML snippet of Settings → LLM showing Base URL = https://integrate.api.nvidia.com/v1, Model = openai/qwen2.5-coder-32b-instruct, and masked API key.
 
 Status (current)
-- [ ] OpenHands restarted (completed)
-- [ ] LLM env var present in container (completed, redacted)
-- [ ] Curl test to NVIDIA NIM (failed — PowerShell header binding issue)
+- [x] OpenHands restarted (completed)
+- [x] LLM env var present in container (completed, redacted)
+- [ ] Curl test to NVIDIA NIM (attempted; failed due to JSON/header issues)
 - [ ] UI Settings verification (pending)
+
+Logs & test outputs (redacted)
+- Container env check (redacted):
+  - LLM_API_KEY=nvapi-REDACTED
+
+- PowerShell curl attempt (error):
+  - Invoke-WebRequest / Invoke-RestMethod binding error when passing headers as a single string. Recommended fix: use -Headers @{ Authorization = "Bearer $env:NVIDIA_NIM_API_KEY"; "Content-Type" = "application/json" } or curl.exe.
+
+- Container curl attempt (error):
+  - failed to decode json body: json: string unexpected end of JSON input
+  - Follow-up attempt produced garbled/partial input, indicating quoting/encoding issues when passing JSON through sh -c on Windows host.
+
+Next steps to complete verification
+1. Run host-level curl.exe with a JSON file to avoid quoting issues:
+   - Save payload to request.json and run:
+     - curl.exe -v -X POST "https://integrate.api.nvidia.com/v1/chat/completions" -H "Authorization: Bearer nvapi-****" -H "Content-Type: application/json" --data-binary @request.json
+2. Or run a clean container exec with here-doc to avoid Windows quoting:
+   - docker compose exec openhands sh -lc "cat > /tmp/request.json <<'EOF'
+     {\"model\":\"qwen/qwen2.5-coder-32b-instruct\",\"messages\":[{\"role\":\"system\",\"content\":\"You are a coding assistant.\"},{\"role\":\"user\",\"content\":\"Write a hello world in Python\"}],\"temperature\":0.2,\"max_tokens\":200}
+     EOF
+     curl -s -X POST 'https://integrate.api.nvidia.com/v1/chat/completions' -H \"Authorization: Bearer \$LLM_API_KEY\" -H 'Content-Type: application/json' --data-binary @/tmp/request.json
+   - This avoids shell quoting problems.
+
+3. Capture the successful JSON response, redact nvapi- value, and append to this JIRA story.
+
+Commit guidance
+- "EPIC-02-STOR-04: restart server and partial verification — logs added; curl test pending (see next steps)"
 
 Commit guidance
 - When ready to record these artifacts to the repo, commit changes with:
