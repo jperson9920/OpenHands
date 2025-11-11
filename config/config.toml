@@ -11,20 +11,13 @@ enable_auto_lint = true
 enable_cli_session = true
 
 [llm]
-# Primary model and environment variable that contains the API key.
-# Configured to use NVIDIA NIM (integrate.api.nvidia.com) via OpenAI-compatible endpoint.
 model = "openai/qwen2.5-coder-32b-instruct"
 base_url = "https://integrate.api.nvidia.com/v1"
 api_key_env = "NVIDIA_NIM_API_KEY"
 custom_llm_provider = "openai"
-# Recommend a conservative temperature for deterministic code actions
 temperature = 0.2
-max_iterations = 50
-max_budget_per_task = 2.0
-
-[llm.fallback]
-model = "anthropic/claude-sonnet-4-20250514"
-api_key_env = "ANTHROPIC_API_KEY"
+top_p = 0.95
+max_output_tokens = 4096
 
 [agent]
 # Use the CodeActAgent by default for code-focused tasks
