@@ -41,8 +41,68 @@ Verification artifacts to record (redact keys)
 - docker compose logs excerpt showing LLM base_url/model initialization (redact keys).
 - Screenshot or exported HTML snippet of Settings → LLM showing masked API key and Base URL/model.
 
-Commit message suggestion
-- "EPIC-02-STOR-04: Add integration & test instructions for NVIDIA NIM (curl test, Docker verification)"
+---
+## Automated run (executed by scripts/EPIC-02-STOR-04-restart.ps1)
+
+Run timestamp: 2025-11-10T20:09:48-08:00 (local dev machine timezone)
+
+Commands executed (host PowerShell)
+- Sourced local `.env` into session and set $env:NVIDIA_NIM_API_KEY
+- docker compose down
+- docker compose up -d
+- docker compose logs --no-color --tail 500 openhands
+- docker compose exec openhands printenv | Select-String 'NVIDIA_NIM_API_KEY|LLM_API_KEY'
+- Attempted curl POST to `https://integrate.api.nvidia.com/v1/chat/completions` using the session env key
+
+Saved logs path: logs/EPIC-02-STOR-04/restart-20251110-200948.log
+
+Key log excerpts (redacted)
+- docker compose lifecycle
+  - Container openhands-dashboard  Stopped
+  - Container openhands-main  Stopped
+  - Container openhands-main  Removed
+  - Network openhands_openhands-network  Removed
+  - Network openhands_openhands-network  Created
+  - Container openhands-main  Created
+  - Container openhands-main  Started
+  - Container openhands-dashboard  Started
+
+- OpenHands startup
+  - openhands-main  | Starting OpenHands...
+  - openhands-main  | Running OpenHands as root
+
+- Environment inside container (redacted)
+  - LLM_API_KEY=nvapi-REDACTED
+
+- Curl test attempt output (captured)
+  - Invoke-WebRequest : Cannot bind parameter 'Headers'. Cannot convert the "Authorization: Bearer nvapi-REDACTED" value of type "System.String" to type "System.Collections.IDictionary".
+    At scripts/EPIC-02-STOR-04-restart.ps1:48 char:72
+    + ... /integrate.api.nvidia.com/v1/chat/completions" -H $authHeader -H "Con ...
+    +                                                       ~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Invoke-WebRequest], ParameterBindingException
+    + FullyQualifiedErrorId : CannotConvertArgumentNoMessage,Microsoft.PowerShell.Commands.InvokeWebRequestCommand
+
+Observations and next actions
+- OpenHands successfully restarted and container reports starting. The runtime env var LLM_API_KEY is present inside the container (value redacted above).
+- The automated curl test failed due to PowerShell binding: the script attempted to pass the Authorization header as a single string to the PowerShell HTTP helper, which expects a header hashtable or raw curl.exe usage. This is why the request did not complete.
+- UI verification (Settings → LLM) has not yet been captured. Verify manually at http://localhost:3000 or inspect `~/.openhands-state/settings.json` to confirm settings precedence and whether the API key is masked.
+
+Suggested fixes to complete verification
+- Rerun the test using one of:
+  - curl.exe (full binary) with -H "Authorization: Bearer $env:NVIDIA_NIM_API_KEY" (preferred on Windows if curl.exe is available)
+  - Invoke-RestMethod -Uri ... -Method Post -Headers @{ Authorization = "Bearer $env:NVIDIA_NIM_API_KEY"; "Content-Type" = "application/json" } -Body $body
+- After a successful curl, capture the response JSON, redact the nvapi- value, and append to this JIRA story.
+- Capture a screenshot or exported HTML snippet of Settings → LLM showing Base URL = https://integrate.api.nvidia.com/v1, Model = openai/qwen2.5-coder-32b-instruct, and masked API key.
+
+Status (current)
+- [ ] OpenHands restarted (completed)
+- [ ] LLM env var present in container (completed, redacted)
+- [ ] Curl test to NVIDIA NIM (failed — PowerShell header binding issue)
+- [ ] UI Settings verification (pending)
+
+Commit guidance
+- When ready to record these artifacts to the repo, commit changes with:
+  - "EPIC-02-STOR-04: restart server and verify NVIDIA NIM integration — logs added to JIRA"
 
 Files referenced
 - [`docs/compass_artifact_wf-1eaff533-6ba1-4935-ae3c-eedbd1330e1b_text_markdown.md`](docs/compass_artifact_wf-1eaff533-6ba1-4935-ae3c-eedbd1330e1b_text_markdown.md:401)
