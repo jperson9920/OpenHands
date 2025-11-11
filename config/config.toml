@@ -11,27 +11,28 @@ enable_auto_lint = true
 enable_cli_session = true
 
 [llm]
-# Primary model and environment variable that contains the API key
-model = "anthropic/claude-sonnet-4-20250514"
-api_key_env = "ANTHROPIC_API_KEY"
-temperature = 0.7
-max_iterations = 50
-max_budget_per_task = 2.0
-
-[llm.fallback]
-model = "anthropic/claude-sonnet-4-20250514"
-api_key_env = "ANTHROPIC_API_KEY"
+model = "openai/qwen2.5-coder-32b-instruct"
+base_url = "https://integrate.api.nvidia.com/v1"
+api_key_env = "NVIDIA_NIM_API_KEY"
+custom_llm_provider = "openai"
+temperature = 0.2
+top_p = 0.95
+max_output_tokens = 4096
 
 [agent]
 # Use the CodeActAgent by default for code-focused tasks
 type = "CodeActAgent"
 function_calling_enabled = true
+# Default model for agents (prefer VS Code LM / Copilot)
+default_model = "copilot/gpt-5-mini"
+# Point to the Copilot-focused system prompt (created in /app/prompts/)
+system_prompt_file = "/app/prompts/copilot_system_prompt.txt"
 
 # Memory/history
 memory_enabled = true
 memory_max_threads = 10
 
-# Optional: point to a custom system prompt file in /app/prompts
+# Optional: previous prompt example (kept for reference)
 # system_prompt_file = "/app/prompts/codeact_system_prompt.txt"
 
 [agent.micro_agents]
